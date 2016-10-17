@@ -1,0 +1,34 @@
+<div class="app-login">
+    <div class="login-container">
+        <header>
+            <div class="page-header">
+                <h3 class="text-center">请您登录</h3>
+            </div>
+        </header>
+        <div class="content">
+            <form class="form-horizontal" role="form" name="form" ng-submit="submitData()">
+                <div class="form-group">
+                    <label for="username" class="control-label col-md-3 col-md-offset-1">username</label>
+                    <div class="col-md-4">
+                        <input type="text" ng-model="user.username" class="form-control" placeholder="username"
+                               name="name" id="username" ng-required='true' />
+                    </div>
+                    <span class="help-block" ng-show="form.name.$dirty&&form.name.$invalid">请正确输入用户名！</span>
+                </div>
+                <div class="form-group">
+                    <label for="userpass" class="control-label col-md-3 col-md-offset-1">password</label>
+                    <div class="col-md-4">
+                        <input type="password" ng-model="user.password" class="form-control" placeholder="password"
+                               name="pass" id="userpass"  ng-required="true"/>
+                    </div>
+                    <p class="help-block" ng-show="form.pass.$dirty&&form.pass.$invalid">请正确输入密码！</p>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-4">
+                        <button type="submit" class="btn btn-success" ng-disabled="form.$invalid">login in</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

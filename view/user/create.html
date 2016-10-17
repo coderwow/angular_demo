@@ -1,0 +1,59 @@
+<div class="container">
+    <div class="page-header">
+        <h3>新建用户</h3>
+    </div>
+    <form role="form" class="form-horizontal form-bug" name="user" ng-submit="submitData()">
+        <div class="form-group">
+            <label for="username" class="control-label col-md-3">用户名 :</label>
+            <div class="col-md-3">
+                <input class="form-control" type="text" placeholder="请输入您的昵称" id="username" name="name" ng-model="user.username" ng-required="true"/>
+            </div>
+            <div class="col-md-3">
+                <span class="text-danger" ng-show="user.name.$dirty&&user.name.$invalid" >用户名是必填的 !</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="password" class="control-label col-md-3">密码 :</label>
+            <div class="col-md-3">
+                <input class="form-control" type="password" placeholder="请输入用户密码" id="password" name="pass" ng-model="user.password" ng-required="true"/>
+            </div>
+            <div class="col-md-3">
+                <span class="text-danger" ng-show="user.pass.$dirty&&user.pass.$invalid" >用户密码必填 !</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="phone" class="control-label col-md-3">手机 :</label>
+            <div class="col-md-3">
+                <input class="form-control" type="tel" placeholder="请输入电话号码" id="phone" name="tel" ng-model="user.phone" ng-required="true" ng-pattern="/^1\d{10}$/" />
+            </div>
+            <div class="col-md-3">
+                <span class="text-danger" ng-show="user.tel.$dirty&&user.tel.$invalid" >你输入的手机号格式有误 !</span>
+            </div>
+        </div>
+        <div class="form-group ">
+            <label  class="control-label col-md-3" style="padding-top:13px;">性别 :</label>
+            <div class="col-md-3">
+                <div class="radio">
+                <label class="control-label" for="man">
+                    <input type="radio" name="sex" id="man" value="man" ng-model="user.sex"> 男
+                </label>
+                &emsp;
+                <label class="control-label" for="woman">
+                    <input type="radio" name="sex" id="woman"  value="woman" ng-model="user.sex">女
+                </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="info" class="control-label col-md-3">简介 :</label>
+            <div class="col-md-3">
+                <textarea cols="6" name="user.info" placeholder="个人简介" id="info" class="form-control" ng-model="user.info"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 col-md-offset-3">
+                <button type="submit" class="btn btn-success mybtn" ng-disabled="user.$invalid" >注册</button>
+            </div>
+        </div>
+    </form>
+</div>

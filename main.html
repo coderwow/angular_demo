@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>我的后台页面</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="my.css">
+</head>
+<body data-ng-app="app" class="display" ng-style="{display:isShow}">
+<div class="container">
+    <header class="header">
+        <div class="pull-right">
+            <span>你好，欢迎回来！</span>
+            <span>{{username}}</span>
+            |
+            <a href="action/logout.php" class="quitBtn">退出</a>
+        </div>
+        <h1>我的管理系统</h1>
+    </header>
+    <div class="main">
+        <div class="main_left" ng-controller="navCtrl">
+            <ul class="navList">
+                <li ng-repeat="item in list">{{item.title}}
+                <ul >
+                    <li ng-repeat="itemChild in item.childList"><a ng-href="{{itemChild.link}}">{{itemChild.title}}</a></li>
+                </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="main_right">
+            <div ng-view></div>
+        </div>
+    </div>
+</div>
+<script src="angular.js"></script>
+<script src="angular-route.js"></script>
+<script>
+    angular.module('app',['ngRoute'])
+            .config(function($routeProvider){
+                $routeProvider
+                        .when('/',{
+                            templateUrl:'view/index.html',
+                            controller:'homeCtrl'
+                        })
+                        .when('/login',{
+                            templateUrl:'view/login.html',
+                            controller:'loginCtrl'
+                        })
+                        .when('/userCreate',{
+                            templateUrl:'view/user/create.html',
+                            controller:'userCreateCtrl'
+                        })
+                        .when('/userList/:pagenum',{
+                            templateUrl:'view/user/list.html',
+                            controller:'userListCtrl'
+                        })
+                        .when('/userInfo',{
+                            templateUrl:'view/user/info.html',
+                            controller:'userInfoCtrl'
+                        })
+                        .when('/newsList/:pagenum',{
+                            templateUrl:'view/news/list.html'
+                        })
+                        .when('/newsInfo',{
+                            templateUrl:'view/news/info.html'
+                        })
+                        .when('/newsCreate',{
+                            templateUrl:'view/news/create.html'
+                        })
+                        .otherwise({
+                            redirectTo:'/login'
+                        })
+            }
+            )
+            .factory('checkLogin',function($http,$location,$rootScope){
+                return function () {
+                    // 发送请求，判断是否登录
+                    $http({
+                        url: 'action/checkLogin.php',
+                        method: 'GET'
+                    })
+                    // 请求成功时候的回调函数
+                            .success(function (res) {
+                                // 如果res中data存在username，我们就要显示这个页面
+                                // 否则显示登录页面（跳转login路由下）
+                                if (res.errno === 0 && res.data) {
+                                    // 登录过
+                                    $rootScope.username=res.data.username;
+
+                                } else {
+                                    // 跳转到登录页面
+                                    $location.path('/login')
+                                }
+                                $rootScope.isShow = 'block'
+                            })
+                }
+            })
+            .run(function(checkLogin){
+                checkLogin();
+            })
+            .controller('loginCtrl',function($scope,$http,$location,$rootScope){
+                     $scope.submitData=function(){
+                         $http.post('action/login.php',$scope.user)
+                                 .success(function(res){
+                                     if(res&&res.errno===0&&res.data){
+                                         console.log(res.data);
+                                         $rootScope.username=res.data.username;
+                                         $location.path('/')
+                                     }
+                                 })
+                     }
+            })
+            .controller('homeCtrl',function($scope,checkLogin,$interval){
+                checkLogin();
+                $scope.date=new Date();
+                $interval(function(){
+                    $scope.date=new Date();
+                },1000)
+            })
+            .controller('userInfoCtrl', function ($scope, $routeParams, $http) {
+                // 获取用户id
+                $scope.userId = $routeParams.userId;
+                // 根据用户id请求数据
+                $http.get('action/userdetail.json', {
+                            params: {
+                                id: $scope.userId
+                            }
+                        })
+                        // 请求成功，我们将返回的数据保存在作用域中
+                        .success(function (res) {
+                            if (res && res.errno === 0) {
+                                $scope.data = res.data
+                            }
+                        })
+            })
+            // 定义用户列表控制器
+            .controller('userListCtrl', function ($scope, $routeParams, $http) {
+                // 获取页码参数,保存在作用域中
+                $scope.num = $routeParams.pageNum;
+                // 根据pageNum请求数据
+                $http.get('action/userlist.php?num=' + $scope.num)
+                        // 返回将数据保存在list中
+                        .success(function (res) {
+                            // 将数据保存下来
+                            if (res && res.errno === 0) {
+                                $scope.list = res.data;
+                            }
+                        })
+            })
+            // 创建创建新闻控制器
+            .controller('createNewsCtrl', function ($scope, $http, $location) {
+                // 定义提交方法
+                $scope.submitData = function () {
+                    // 提交数据 $scope.news
+                    $http.post("action/createnews.php", $scope.user)
+                            // 请求成功，跳转列表页面
+                            .success(function (res) {
+                                if (res && res.errno === 0) {
+                                    // 跳转列表页
+                                    $location.path('/newslist/1')
+                                }
+                            })
+                }
+            })
+            // 创建新闻详情控制器
+            .controller('newsInfoCtrl', function ($scope, $routeParams, $http) {
+                // 第一步获取新闻id
+                $scope.newsId = $routeParams.newsId;
+                // 第二步请求新闻数据
+                $http.get('action/newsdetail.php', {
+                            params: {
+                                id : $scope.newsId
+                            }
+                        })
+                        // 第三步渲染数据
+                        .success(function (res) {
+                            if (res && res.errno === 0) {
+                                $scope.data = res.data;
+                            }
+                        })
+            })
+            // 创建新闻列表控制器
+            .controller('newsListCtrl', function ($scope, $routeParams, $http) {
+                // 第一步获取页面
+                $scope.num = $routeParams.pageNum;
+                // 第二步请求数据
+                $http.get('action/newslist.php?pageNum=' + $scope.num)
+                        // 第三步渲染数据
+                        .success(function (res) {
+                            if (res && res.errno === 0) {
+                                $scope.list = res.data;
+                            }
+                        })
+            })
+            .controller('userCreateCtrl',function($scope,$http,$location){
+                $scope.user={
+                    sex:'man'
+                };
+                $scope.submitData=function(){
+                    $http.post('action/createuser.php',$scope.user)
+                            .success(function(res){
+                                if (res && res.errno === 0) {
+                                    $location.path('/userList/1')
+                                }
+                            })
+
+                }
+            })
+            .controller('navCtrl',function($scope){
+                $scope.list=[{
+                    title:'用户模块',
+                    childList:[
+                        {
+                            title:'创建用户',
+                            link:'#/userCreate'
+                        },
+                        {
+                            title:'用户列表',
+                            link:'#/userList/1'
+                        }
+                    ]
+                }
+                ,{
+                        title:'新闻模块',
+                        childList:[
+                            {
+                                title:'新闻列表',
+                                link:'#/newsList/1'
+                            },
+                            {
+                                title:'创建新闻',
+                                link:'#/newsCreate'
+                            }
+                        ]
+                    }
+                ]
+            })
+
+</script>
+</body>
+</html>
